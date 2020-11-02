@@ -1,0 +1,7 @@
+{
+  "dbname": "acr_local_atlas",
+  "dbuser": "admin_la",
+  "dbpassword": "iw02h2&Y",
+  "host": "62.151.179.114",
+  "jwtSecret": "jwt-token-local-atlas"
+}
