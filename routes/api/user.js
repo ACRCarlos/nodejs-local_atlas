@@ -5,7 +5,7 @@ const { check } = require("express-validator");
 const auth = require("../../middleware/auth");
 const UserController = require("../../controllers/user");
 
-router.get("/", auth, UserController.getUser);
+router.get("/user", auth, UserController.getUser);
 
 router.post(
   "/register",
