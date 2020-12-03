@@ -2,8 +2,13 @@ const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+const crypto = require("crypto");
+const sgmail = require("@sendgrid/mail");
 
 const User = require("../models/User");
+const UserResetPassword = require("../models/UserResetPassword");
+
+sgmail.setApiKey(config.get("apiKeysendgrid"));
 
 exports.postRegisterUser = async (req, res) => {
   const errors = validationResult(req);
@@ -93,6 +98,61 @@ exports.postLoginUser = async (req, res) => {
     );
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ msg: "Error del servidor" });
+    res.status(500).json({ msg: "Server error" });
   }
+};
+
+exports.postResetPassword = async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  crypto.randomBytes(32, async (err, buffer) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    const token = buffer.toString("hex");
+
+    const { email } = req.body;
+
+    try {
+      let user = await User.findOne({ where: { email } });
+
+      if (!user) {
+        return res.status(400).json({
+          errors: [{ msg: "this email does NOT exist in our records" }],
+        });
+      }
+
+      let resetToken = token;
+      let resetTokenExpiration = Date.now() + 3600;
+      let isActive = "yes";
+      let userId = user.id;
+
+      await UserResetPassword.create({
+        resetToken,
+        resetTokenExpiration,
+        isActive,
+        userId,
+      });
+
+      await sgmail.send({
+        from: "carlosa@acrdigitalmarketing.com",
+        to: email,
+        subject: "Password reset",
+        html: `<p>You requested a password reset</p>
+        <p>Click this <a href="http://localatlas.com/reset/${token}">link</a> to set a new password</p>
+        `,
+      });
+
+      res.json({ msg: "Email sent", token });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ msg: "Server error" });
+    }
+  });
 };

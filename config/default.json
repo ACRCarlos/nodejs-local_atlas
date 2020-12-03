@@ -3,5 +3,6 @@
   "dbuser": "admin_la",
   "dbpassword": "iw02h2&Y",
   "host": "62.151.179.114",
-  "jwtSecret": "jwt-token-local-atlas"
+  "jwtSecret": "jwt-token-local-atlas",
+  "apiKeysendgrid": "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"
 }

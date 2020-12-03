@@ -32,4 +32,10 @@ router.post(
   UserController.postLoginUser
 );
 
+router.post(
+  "/reset",
+  [check("email", "Please include a valid email").isEmail()],
+  UserController.postResetPassword
+);
+
 module.exports = router;
